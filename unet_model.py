@@ -1,4 +1,7 @@
 import tensorflow as tf
+import logging
+
+log = logging.getLogger("unet_model")
 
 
 class UnetModel:
@@ -17,7 +20,7 @@ class UnetModel:
         down_sections_output = []
 
         for section in range(self.num_sections):
-            print("Input shape at down section %d: %s" % (section, current_input.shape))
+            log.debug("Input shape at down section %d: %s" % (section, current_input.shape))
 
             with tf.name_scope("section_%d" % section):
                 current_input = self.__create_layer_section(current_input, current_num_filters)
@@ -35,12 +38,10 @@ class UnetModel:
 
                 current_num_filters *= 2
 
-            print("Output shape at down section %d: %s" % (section, current_input.shape))
-
-            print()
+            log.debug("Output shape at down section %d: %s" % (section, current_input.shape))
 
         for section in range(self.num_sections - 1):
-            print("Input shape at up section %d: %s" % (section, current_input.shape))
+            log.debug("Input shape at up section %d: %s" % (section, current_input.shape))
 
             upsample_size = tf.stack([
                 -1,
@@ -64,18 +65,16 @@ class UnetModel:
 
             corresponding_down_section = down_sections_output[-(section + 2)]
 
-            print("Adding shapes at up section %d: %s + %s" %
-                (section, corresponding_down_section.shape, current_input.shape))
+            log.debug("Adding shapes at up section %d: %s + %s" %
+                  (section, corresponding_down_section.shape, current_input.shape))
 
             current_input = tf.concat([corresponding_down_section, current_input], 3)
 
-            print("Result of add at up section %d: %s" % (section, current_input.shape))
+            log.debug("Result of add at up section %d: %s" % (section, current_input.shape))
 
             current_input = self.__create_layer_section(current_input, current_num_filters)
 
-            print("Output shape at up section %d: %s" % (section, current_input.shape))
-
-            print()
+            log.debug("Output shape at up section %d: %s" % (section, current_input.shape))
 
         return current_input
 
