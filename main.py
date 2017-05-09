@@ -40,6 +40,10 @@ def main():
 
     tf.summary.scalar("cost", cost)
 
+    with tf.variable_scope("image_summaries"):
+        tf.summary.image("truth", output_image)
+        tf.summary.image("guess", model.output)
+
     optimizer = tf.train.AdamOptimizer(args.learning_rate).minimize(cost)
 
     tf_utils.generic_runner.run(
