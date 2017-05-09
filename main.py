@@ -27,7 +27,7 @@ def main():
     def get_batch(size):
         return np.random.randn(size, 256, 256, 1), np.random.randn(size, 256, 256, 1)
 
-    def test_callback(cost_result):
+    def test_callback(cost_result, _):
         log.info("Cost: %s" % cost_result)
 
     with tf.name_scope("cost"):
@@ -37,6 +37,8 @@ def main():
                     tf.square(
                         tf.abs(model.output - output_image)),
                     [1, 2, 3])))
+
+    tf.summary.scalar("cost", cost)
 
     optimizer = tf.train.AdamOptimizer(args.learning_rate).minimize(cost)
 
