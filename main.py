@@ -13,7 +13,7 @@ def main():
 
     input_image = tf.placeholder(dtype="float32", shape=[None, 256, 256, 1], name="input_image")
     output_image = tf.placeholder(dtype="float32", shape=[None, 256, 256, 1], name="output_image")
-    model = UnetModel(input_image)
+    model = UnetModel(sys.argv, input_image)
 
     log.debug("Model input size: %s" % input_image.shape)
     log.debug("Model output size: %s" % model.output.shape)

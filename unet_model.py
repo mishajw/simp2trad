@@ -1,14 +1,22 @@
-import tensorflow as tf
+import argparse
 import logging
+import tensorflow as tf
 
 log = logging.getLogger("unet_model")
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--num_sections", type=int, default=2)
+parser.add_argument("--num_layers_per_section", type=int, default=1)
+parser.add_argument("--start_num_filters", type=int, default=16)
+
 
 class UnetModel:
-    def __init__(self, input_image):
-        self.num_sections = 4
-        self.num_layers_per_section = 2
-        self.start_num_filters = 64
+    def __init__(self, cli_args, input_image):
+        args, _ = parser.parse_known_args(cli_args)
+
+        self.num_sections = args.num_sections
+        self.num_layers_per_section = args.num_layers_per_section
+        self.start_num_filters = args.start_num_filters
 
         sections = self.__create_all_sections(input_image)
         self.output = self.__create_flattening_layer(sections)
@@ -76,7 +84,7 @@ class UnetModel:
                 corresponding_down_section = down_sections_output[-(section + 1)]
 
                 log.debug("Adding shapes at up section %d: %s + %s" %
-                      (section, corresponding_down_section.shape, current_input.shape))
+                          (section, corresponding_down_section.shape, current_input.shape))
 
                 current_input = tf.concat([corresponding_down_section, current_input], 3, name="up_down_link")
 
