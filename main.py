@@ -21,6 +21,9 @@ def main():
     def get_batch(size):
         return np.random.randn(size, 256, 256, 1), np.random.randn(size, 256, 256, 1)
 
+    def test_callback(cost_result):
+        log.info("Cost: %s" % cost_result)
+
     with tf.name_scope("cost"):
         cost = tf.sqrt(
             tf.reduce_sum(
@@ -38,7 +41,8 @@ def main():
         input_image,
         output_image,
         train_evaluations=[optimizer],
-        test_evaluations=[cost])
+        test_evaluations=[cost],
+        test_callback=test_callback)
 
 
 if __name__ == "__main__":
