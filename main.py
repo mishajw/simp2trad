@@ -1,15 +1,21 @@
 from unet_model import UnetModel
+import argparse
 import logging
+import numpy as np
 import sys
 import tensorflow as tf
 import tf_utils
-import numpy as np
 
 log = logging.getLogger("main")
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--learning_rate", type=int, default=0.0001)
 
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
+
+    args, _ = parser.parse_known_args()
 
     input_image = tf.placeholder(dtype="float32", shape=[None, 256, 256, 1], name="input_image")
     output_image = tf.placeholder(dtype="float32", shape=[None, 256, 256, 1], name="output_image")
@@ -32,7 +38,7 @@ def main():
                         tf.abs(model.output - output_image)),
                     [1, 2, 3])))
 
-    optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
+    optimizer = tf.train.AdamOptimizer(args.learning_rate).minimize(cost)
 
     tf_utils.generic_runner.run(
         "simp2trad",
