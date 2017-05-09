@@ -25,11 +25,12 @@ def main():
         log.info("Cost: %s" % cost_result)
 
     with tf.name_scope("cost"):
-        cost = tf.sqrt(
-            tf.reduce_sum(
-                tf.square(
-                    tf.abs(model.output - output_image)),
-                [1, 2, 3]))
+        cost = tf.reduce_mean(
+            tf.sqrt(
+                tf.reduce_mean(
+                    tf.square(
+                        tf.abs(model.output - output_image)),
+                    [1, 2, 3])))
 
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
 
