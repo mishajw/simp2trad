@@ -25,7 +25,7 @@ def main():
     log.debug("Model output size: %s" % model.output.shape)
 
     def get_batch(size):
-        return np.random.randn(size, 256, 256, 1), np.random.randn(size, 256, 256, 1)
+        return np.full((size, 256, 256, 1), 0.2), np.full((size, 256, 256, 1), 0.8)
 
     def test_callback(cost_result, _):
         log.info("Cost: %s" % cost_result)
