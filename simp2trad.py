@@ -1,4 +1,5 @@
 import argparse
+import data_generator
 import logging
 import train
 
@@ -9,6 +10,7 @@ def add_arguments(parser):
     parser.add_argument("--generate_data", action="store_true")
     parser.add_argument("--train", action="store_true")
     train.add_arguments(parser)
+    data_generator.add_arguments(parser)
 
 
 def main():
@@ -21,7 +23,7 @@ def main():
 
     if args.generate_data:
         log.info("Generating data")
-        # TODO: Write class to generate data
+        data_generator.generate(args)
 
     if args.train:
         log.info("Training")
