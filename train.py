@@ -1,4 +1,6 @@
+from tf_utils import data_holder
 from tf_utils import generic_runner
+from tf_utils.data_holder import DataHolder
 import logging
 import numpy as np
 import tensorflow as tf
@@ -11,6 +13,7 @@ def add_arguments(parser):
     parser.add_argument("--learning_rate", type=int, default=0.0001)
     unet_model.add_arguments(parser)
     generic_runner.add_arguments(parser)
+    data_holder.add_arguments(parser)
 
 
 def train(args):
@@ -21,8 +24,7 @@ def train(args):
     log.debug("Model input size: %s" % input_image.shape)
     log.debug("Model output size: %s" % model.output.shape)
 
-    def get_batch(size):
-        return np.full((size, 256, 256, 1), 0.2), np.full((size, 256, 256, 1), 0.8)
+    data = DataHolder.from_input_output_lists(args, np.full((8, 256, 256, 1), 0.2), np.full((8, 256, 256, 1), 0.8))
 
     def test_callback(cost_result, _):
         log.info("Cost: %s" % cost_result)
@@ -46,8 +48,8 @@ def train(args):
     generic_runner.run(
         "simp2trad",
         args,
-        get_batch,
-        get_batch(4),
+        data.get_batch,
+        data.get_test_data(),
         input_image,
         output_image,
         train_evaluations=[optimizer],
