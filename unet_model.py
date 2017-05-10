@@ -1,18 +1,17 @@
-import argparse
 import logging
 import tensorflow as tf
 
 log = logging.getLogger("unet_model")
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--num_sections", type=int, default=2)
-parser.add_argument("--num_layers_per_section", type=int, default=1)
-parser.add_argument("--start_num_filters", type=int, default=16)
+
+def add_arguments(parser):
+    parser.add_argument("--num_sections", type=int, default=2)
+    parser.add_argument("--num_layers_per_section", type=int, default=1)
+    parser.add_argument("--start_num_filters", type=int, default=16)
 
 
 class UnetModel:
-    def __init__(self, cli_args, input_image):
-        args, _ = parser.parse_known_args(cli_args)
+    def __init__(self, args, input_image):
 
         self.num_sections = args.num_sections
         self.num_layers_per_section = args.num_layers_per_section
