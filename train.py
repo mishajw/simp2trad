@@ -1,8 +1,10 @@
+from scipy import misc  # TODO: Find way of reading .png without using scipy
 from tf_utils import data_holder
 from tf_utils import generic_runner
 from tf_utils.data_holder import DataHolder
 import logging
 import numpy as np
+import os
 import tensorflow as tf
 import unet_model
 
@@ -17,14 +19,16 @@ def add_arguments(parser):
 
 
 def train(args):
-    input_image = tf.placeholder(dtype="float32", shape=[None, 256, 256, 1], name="input_image")
-    output_image = tf.placeholder(dtype="float32", shape=[None, 256, 256, 1], name="output_image")
+    input_image = tf.placeholder(
+        dtype="float32", shape=[None, args.image_size, args.image_size, 1], name="input_image")
+    output_image = tf.placeholder(
+        dtype="float32", shape=[None, args.image_size, args.image_size, 1], name="output_image")
     model = unet_model.UnetModel(args, input_image)
 
     log.debug("Model input size: %s" % input_image.shape)
     log.debug("Model output size: %s" % model.output.shape)
 
-    data = DataHolder.from_input_output_lists(args, np.full((8, 256, 256, 1), 0.2), np.full((8, 256, 256, 1), 0.8))
+    data = get_data_handler(args)
 
     def test_callback(cost_result, _):
         log.info("Cost: %s" % cost_result)
@@ -40,6 +44,7 @@ def train(args):
     tf.summary.scalar("cost", cost)
 
     with tf.variable_scope("image_summaries"):
+        tf.summary.image("input", input_image)
         tf.summary.image("truth", output_image)
         tf.summary.image("guess", model.output)
 
@@ -55,3 +60,24 @@ def train(args):
         train_evaluations=[optimizer],
         test_evaluations=[cost],
         test_callback=test_callback)
+
+
+def get_data_handler(args):
+    """
+    Get the DataHandler for data for the model
+    :param args: arguments for reading data
+    :return: the DataHandler
+    """
+
+    def file_to_data(file):
+        return np.expand_dims(misc.imread(file), 2)
+
+    def get_data(i):
+        input_path = os.path.join(args.data_path, "input", "%d.png" % i)
+        output_path = os.path.join(args.data_path, "output", "%d.png" % i)
+
+        return file_to_data(input_path), file_to_data(output_path)
+
+    data_length = len(os.listdir(os.path.join(args.data_path, "input")))
+
+    return DataHolder(args, get_data, data_length)
