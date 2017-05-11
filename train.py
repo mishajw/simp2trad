@@ -34,11 +34,14 @@ def train(args):
         log.info("Cost: %s" % cost_result)
 
     with tf.name_scope("cost"):
+        input_output_difference = tf.abs(input_image - output_image)
+        truth_guess_difference = tf.abs(model.output - output_image)
+        weighted_difference = (input_output_difference / 255) * truth_guess_difference
+
         cost = tf.reduce_mean(
             tf.sqrt(
                 tf.reduce_mean(
-                    tf.square(
-                        tf.abs(model.output - output_image)),
+                    tf.square(weighted_difference),
                     [1, 2, 3])))
 
     tf.summary.scalar("cost", cost)
@@ -47,6 +50,9 @@ def train(args):
         tf.summary.image("input", input_image)
         tf.summary.image("truth", output_image)
         tf.summary.image("guess", model.output)
+        tf.summary.image("input_output_difference", input_output_difference)
+        tf.summary.image("truth_guess_difference", truth_guess_difference)
+        tf.summary.image("weighted_difference", weighted_difference)
 
     optimizer = tf.train.AdamOptimizer(args.learning_rate).minimize(cost)
 
