@@ -86,6 +86,7 @@ def create_image_from_unicode(unicode_number, size, font_path):
 
     image = Image.new("L", (size, size), 255)
     draw = ImageDraw.Draw(image)
+    draw.fontmode = 1  # Remove aliasing
 
     font = ImageFont.truetype(font_path, size)
     draw.text((0, -size * 0.28), u"%s" % unicode, font=font)
