@@ -13,6 +13,7 @@ log = logging.getLogger("train")
 
 def add_arguments(parser):
     parser.add_argument("--learning_rate", type=int, default=0.0001)
+    parser.add_argument("--input_similarity_cost", type=float, default=None)
     unet_model.add_arguments(parser)
     generic_runner.add_arguments(parser)
     data_holder.add_arguments(parser)
@@ -34,12 +35,24 @@ def train(args):
         log.info("Cost: %s" % cost_result)
 
     with tf.name_scope("cost"):
-        cost = tf.reduce_mean(
-            tf.sqrt(
-                tf.reduce_mean(
-                    tf.square(
-                        tf.abs(model.output - output_image)),
-                    [1, 2, 3])))
+        def similarity(a, b):
+            return tf.reduce_mean(
+                tf.sqrt(
+                    tf.reduce_mean(
+                        tf.square(
+                            tf.abs(a - b)),
+                        [1, 2, 3])))
+
+        output_similarity = similarity(model.output, output_image)
+
+        if args.input_similarity_cost is not None:
+            input_similarity = similarity(model.output, input_image)
+            cost = output_similarity - (input_similarity * args.input_similarity_cost)
+
+            tf.summary.scalar("input_similarity", input_similarity)
+            tf.summary.scalar("output_similarity", output_similarity)
+        else:
+            cost = output_similarity
 
     tf.summary.scalar("cost", cost)
 
