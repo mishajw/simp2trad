@@ -13,6 +13,8 @@ log = logging.getLogger("train")
 
 def add_arguments(parser):
     parser.add_argument("--learning_rate", type=int, default=0.0001)
+    parser.add_argument("--weighted_cost", action="store_true")
+    parser.add_argument("--weighted_cost_weight", type=float, default=0.5)
     unet_model.add_arguments(parser)
     generic_runner.add_arguments(parser)
     data_holder.add_arguments(parser)
@@ -34,14 +36,21 @@ def train(args):
         log.info("Cost: %s" % cost_result)
 
     with tf.name_scope("cost"):
-        input_output_difference = tf.abs(input_image - output_image)
-        truth_guess_difference = tf.abs(model.output - output_image)
-        weighted_difference = (input_output_difference / 255) * truth_guess_difference
+        difference = tf.abs(model.output - output_image)
+
+        if args.weighted_cost:
+            input_output_difference = tf.abs(input_image - output_image)
+            weighted_input_output_difference =\
+                (input_output_difference / (args.weighted_cost_weight * 255)) + (255 * (1 - args.weighted_cost_weight))
+
+            tf.summary.image("weighted_input_output_difference", weighted_input_output_difference)
+
+            difference = weighted_input_output_difference * difference
 
         cost = tf.reduce_mean(
             tf.sqrt(
                 tf.reduce_mean(
-                    tf.square(weighted_difference),
+                    tf.square(difference),
                     [1, 2, 3])))
 
     tf.summary.scalar("cost", cost)
@@ -50,9 +59,7 @@ def train(args):
         tf.summary.image("input", input_image)
         tf.summary.image("truth", output_image)
         tf.summary.image("guess", model.output)
-        tf.summary.image("input_output_difference", input_output_difference)
-        tf.summary.image("truth_guess_difference", truth_guess_difference)
-        tf.summary.image("weighted_difference", weighted_difference)
+        tf.summary.image("difference", difference)
 
     optimizer = tf.train.AdamOptimizer(args.learning_rate).minimize(cost)
 
