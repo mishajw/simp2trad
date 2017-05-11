@@ -57,9 +57,13 @@ def train(args):
     tf.summary.scalar("cost", cost)
 
     with tf.variable_scope("image_summaries"):
-        tf.summary.image("input", input_image)
-        tf.summary.image("truth", output_image)
-        tf.summary.image("guess", model.output)
+        # Put all three images side by side
+        all_images = tf.concat([input_image, model.output, output_image], axis=2)
+
+        # Limit to 0-255
+        all_images = tf.maximum(0.0, tf.minimum(255.0, all_images))
+
+        tf.summary.image("all_images", all_images, max_outputs=8)
 
     optimizer = tf.train.AdamOptimizer(args.learning_rate).minimize(cost)
 
