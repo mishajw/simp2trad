@@ -47,7 +47,7 @@ def train(args):
 
         if args.input_similarity_cost is not None:
             input_similarity = similarity(model.output, input_image)
-            cost = output_similarity - (input_similarity * args.input_similarity_cost)
+            cost = tf.square(output_similarity) - (input_similarity * args.input_similarity_cost)
 
             tf.summary.scalar("input_similarity", input_similarity)
             tf.summary.scalar("output_similarity", output_similarity)
