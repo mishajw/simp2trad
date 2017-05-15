@@ -1,5 +1,4 @@
 from scipy import misc  # TODO: Find way of reading .png without using scipy
-import tf_utils
 from tf_utils import data_holder
 from tf_utils import generic_runner
 from tf_utils.data_holder import DataHolder
@@ -7,6 +6,7 @@ import logging
 import numpy as np
 import os
 import tensorflow as tf
+import unet_l2_trainer
 import unet_model
 
 log = logging.getLogger("train")
@@ -14,10 +14,10 @@ log = logging.getLogger("train")
 
 def add_arguments(parser):
     parser.add_argument("--learning_rate", type=int, default=0.0001)
-    parser.add_argument("--input_similarity_cost", type=float, default=None)
     unet_model.add_arguments(parser)
     generic_runner.add_arguments(parser)
     data_holder.add_arguments(parser)
+    unet_l2_trainer.add_arguments(parser)
 
 
 def train(args):
@@ -25,55 +25,12 @@ def train(args):
         dtype="float32", shape=[None, args.image_size, args.image_size, 1], name="input_image")
     output_image = tf.placeholder(
         dtype="float32", shape=[None, args.image_size, args.image_size, 1], name="output_image")
-    model = unet_model.UnetModel(args, input_image)
-
-    log.debug("Model input size: %s" % input_image.shape)
-    log.debug("Model output size: %s" % model.output.shape)
 
     data = get_data_handler(args)
 
-    def test_callback(cost_result, _):
-        log.info("Cost: %s" % cost_result)
+    optimizer = tf.train.AdamOptimizer(args.learning_rate)
 
-    with tf.name_scope("cost"):
-        def similarity(a, b):
-            return tf.reduce_mean(
-                tf.sqrt(
-                    tf.reduce_mean(
-                        tf.square(
-                            tf.abs(a - b)),
-                        [1, 2, 3])))
-
-        output_similarity = similarity(model.output, output_image)
-
-        if args.input_similarity_cost is not None:
-            input_similarity = similarity(model.output, input_image)
-            cost = tf.square(output_similarity) - (input_similarity * args.input_similarity_cost)
-
-            tf.summary.scalar("input_similarity", input_similarity)
-            tf.summary.scalar("output_similarity", output_similarity)
-        else:
-            cost = output_similarity
-
-    tf.summary.scalar("cost", cost)
-
-    tf.summary.image(
-        "all_images",
-        tf_utils.create_generation_comparison_images(input_image, output_image, model.output),
-        max_outputs=8)
-
-    optimizer = tf.train.AdamOptimizer(args.learning_rate).minimize(cost)
-
-    generic_runner.run(
-        "simp2trad",
-        args,
-        data.get_batch,
-        data.get_test_data(),
-        input_image,
-        output_image,
-        train_evaluations=[optimizer],
-        test_evaluations=[cost],
-        test_callback=test_callback)
+    unet_l2_trainer.train(args, input_image, output_image, data, optimizer)
 
 
 def get_data_handler(args):
