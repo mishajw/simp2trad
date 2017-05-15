@@ -6,6 +6,7 @@ import logging
 import numpy as np
 import os
 import tensorflow as tf
+import unet_cgan_trainer
 import unet_l2_trainer
 import unet_model
 
@@ -13,10 +14,14 @@ log = logging.getLogger("train")
 
 
 def add_arguments(parser):
+    parser.add_argument("--model", type=str, default="cgan")
+    parser.add_argument("--cgan", action="store_const", dest="train_type", const="cgan")
+    parser.add_argument("--l2", action="store_const", dest="train_type", const="l2")
     parser.add_argument("--learning_rate", type=int, default=0.0001)
     unet_model.add_arguments(parser)
     generic_runner.add_arguments(parser)
     data_holder.add_arguments(parser)
+    unet_cgan_trainer.add_arguments(parser)
     unet_l2_trainer.add_arguments(parser)
 
 
@@ -30,7 +35,10 @@ def train(args):
 
     optimizer = tf.train.AdamOptimizer(args.learning_rate)
 
-    unet_l2_trainer.train(args, input_image, output_image, data, optimizer)
+    if args.train_type == "cgan":
+        unet_cgan_trainer.train(args, input_image, output_image, data, optimizer)
+    elif args.train_type == "l2":
+        unet_l2_trainer.train(args, input_image, output_image, data, optimizer)
 
 
 def get_data_handler(args):
