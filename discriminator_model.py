@@ -53,9 +53,33 @@ class DiscriminatorModel:
                     current_input,
                     [tf.shape(current_input)[0], flattened_size])
 
-                weights = tf.get_variable(
-                    shape=[flattened_size, 1], initializer=tf.random_normal_initializer(), name="weights")
-                biases = tf.get_variable(
-                    shape=[1], initializer=tf.zeros_initializer(), name="biases")
+                weights_to_fully_connected = tf.get_variable(
+                    shape=[flattened_size, args.fully_connected_size],
+                    initializer=tf.random_normal_initializer(),
+                    name="weights_to_fully_connected")
 
-                return tf.nn.sigmoid(tf.matmul(flattened, weights) + biases)
+                biases_to_fully_connected = tf.get_variable(
+                    shape=[args.fully_connected_size],
+                    initializer=tf.zeros_initializer(),
+                    name="biases_to_fully_connected")
+
+                fully_connected_activation = \
+                    tf.nn.sigmoid(tf.matmul(flattened, weights_to_fully_connected) + biases_to_fully_connected)
+
+                weights_to_output = tf.get_variable(
+                    shape=[args.fully_connected_size, 1],
+                    initializer=tf.random_normal_initializer(),
+                    name="weights_to_output")
+
+                biases_to_output = tf.get_variable(
+                    shape=[1],
+                    initializer=tf.zeros_initializer(),
+                    name="biases_to_output")
+
+                with tf.variable_scope("weights_to_fully_connected_summary", reuse=reuse):
+                    tf_utils.tensor_summary(weights_to_fully_connected)
+
+                with tf.variable_scope("weights_to_output_summary", reuse=reuse):
+                    tf_utils.tensor_summary(weights_to_output)
+
+                return tf.nn.sigmoid(tf.matmul(fully_connected_activation, weights_to_output) + biases_to_output)
