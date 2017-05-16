@@ -24,7 +24,7 @@ def train(args, input_image, output_image, data, optimizer):
 
     with tf.variable_scope("discriminator"):
         discriminator = discriminator_model.DiscriminatorModel(
-            args, truth_image=output_image, generated_image=unet_model.output)
+            args, input_image=input_image, truth_image=output_image, generated_image=unet_model.output)
 
     trainable_variables = tf.trainable_variables()
 
