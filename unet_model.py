@@ -1,5 +1,6 @@
 import logging
 import tensorflow as tf
+import tf_utils
 
 log = logging.getLogger("unet_model")
 
@@ -12,13 +13,15 @@ def add_arguments(parser):
 
 class UnetModel:
     def __init__(self, args, input_image):
-
         self.num_sections = args.num_sections
         self.num_layers_per_section = args.num_layers_per_section
         self.start_num_filters = args.start_num_filters
 
         sections = self.__create_all_sections(input_image)
         self.output = self.__create_flattening_layer(sections)
+
+        with tf.variable_scope("output"):
+            tf_utils.tensor_summary(self.output)
 
     def __create_all_sections(self, input_image):
         current_num_filters = self.start_num_filters
