@@ -49,7 +49,8 @@ def get_data_handler(args):
     """
 
     def file_to_data(file):
-        return np.expand_dims(misc.imread(file), 2)
+        # Normalise pixels into range -1 to 1
+        return (np.expand_dims(misc.imread(file), 2) / 128) - 1
 
     def get_data(i):
         input_path = os.path.join(args.data_path, "input", "%d.png" % i)
