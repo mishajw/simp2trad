@@ -12,12 +12,17 @@ def add_arguments(parser):
 
 
 class UnetModel:
-    def __init__(self, args, input_image):
+    def __init__(self, args, input_image, random_noise=None):
         self.num_sections = args.num_sections
         self.num_layers_per_section = args.num_layers_per_section
         self.start_num_filters = args.start_num_filters
 
-        sections = self.__create_all_sections(input_image)
+        if random_noise is not None:
+            model_input = tf.concat([input_image, random_noise], axis=3)
+        else:
+            model_input = input_image
+
+        sections = self.__create_all_sections(model_input)
         self.output = self.__create_flattening_layer(sections)
 
         with tf.variable_scope("output"):
