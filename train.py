@@ -17,7 +17,7 @@ def add_arguments(parser):
     parser.add_argument("--model", type=str, default="cgan")
     parser.add_argument("--cgan", action="store_const", dest="train_type", const="cgan")
     parser.add_argument("--l2", action="store_const", dest="train_type", const="l2")
-    parser.add_argument("--learning_rate", type=int, default=0.0001)
+    parser.add_argument("--learning_rate", type=float, default=0.0001)
     unet_model.add_arguments(parser)
     generic_runner.add_arguments(parser)
     data_holder.add_arguments(parser)
