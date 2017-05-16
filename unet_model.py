@@ -123,5 +123,5 @@ class UnetModel:
             layer_input,
             filters=1,
             kernel_size=[1, 1],
-            activation=tf.nn.relu,
+            activation=tf.nn.tanh,
             name="flattening_layer")
