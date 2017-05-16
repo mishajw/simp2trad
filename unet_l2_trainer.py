@@ -11,7 +11,7 @@ import logging
 import tensorflow as tf
 import tf_utils
 
-log = logging.getLogger("unet_l2_trainer")
+log = logging.getLogger("simp2trad.unet_l2_trainer")
 
 
 def add_arguments(parser):

@@ -2,7 +2,7 @@ import logging
 import tensorflow as tf
 import tf_utils
 
-log = logging.getLogger("unet_model")
+log = logging.getLogger("simp2trad.unet_model")
 
 
 def add_arguments(parser):

@@ -5,7 +5,7 @@ import logging
 import numpy as np
 import os
 
-log = logging.getLogger("data_generator")
+log = logging.getLogger("simp2trad.data_generator")
 
 
 def add_arguments(parser):

@@ -10,7 +10,7 @@ import unet_cgan_trainer
 import unet_l2_trainer
 import unet_model
 
-log = logging.getLogger("train")
+log = logging.getLogger("simp2trad.train")
 
 
 def add_arguments(parser):

@@ -3,7 +3,7 @@ import data_generator
 import logging
 import train
 
-log = logging.getLogger("main")
+log = logging.getLogger("simp2trad.main")
 
 
 def add_arguments(parser):
@@ -15,6 +15,8 @@ def add_arguments(parser):
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
+    for handler in logging.root.handlers:
+        handler.addFilter(logging.Filter("simp2trad"))
 
     parser = argparse.ArgumentParser()
     add_arguments(parser)
